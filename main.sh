@@ -1,4 +1,4 @@
 #!/bin/bash
 # testing...
 
-echo "Hello, world!"
+python main.py
