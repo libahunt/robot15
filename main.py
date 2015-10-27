@@ -1,1 +1,2 @@
-print("Hello, world! In main.py")
+print("Starting main.py \n\n")
+
