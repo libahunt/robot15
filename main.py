@@ -3,6 +3,7 @@ print("Starting main.py \n\n")
 #--------------------------------------------
 # Solving the maze
 #--------------------------------------------
+
 import Maze
 
 #sample only stuff
@@ -20,7 +21,7 @@ for i in range(5):
 	print sampleMaze5bin[i]
 print " "
 
-Maze.solve(sampleMaze5bin, sampleMaze5Target)
+Maze.solve(Maze.binToMaze(sampleMaze5bin), sampleMaze5Target)
 
 print " "
 print " "
@@ -43,4 +44,46 @@ for i in range(8):
 	print sampleMaze8bin[i]
 print " "
 
-Maze.solve(sampleMaze8bin, sampleMaze8Target)
+Maze.solve(Maze.binToMaze(sampleMaze8bin), sampleMaze8Target)
+
+#-------------------------------
+#test mapping 
+#-------------------------------
+
+mazeLength = 8
+maze = Maze.createUnknown(mazeLength)
+print "Create unknown object: "
+
+for i in range(mazeLength):
+	for j in range(mazeLength):
+		print maze[i][j], maze[i][j].up, maze[i][j].right, maze[i][j].down, maze[i][j].left
+
+
+
+
+#robot starts from orientation to left
+currentOrientation = 2 # bitshift 0 right, 1 down, 2 left, 3 up
+#and from last address in the maze
+currentAddress = [mazeLength-1, mazeLength-1]
+#behind the robot there is a wall
+maze[currentAddress[0]][currentAddress[1]].knownRight = True
+maze[currentAddress[0]][currentAddress[1]].right = False
+
+#wait arduino to report "d"
+#Tell arduino to search: print "e"
+
+#pretend received dummy report, in real life report ends with "d"
+report = 2260
+print "report ", report
+
+Maze.mapReport(maze, report, currentAddress, currentOrientation)
+
+for i in range(mazeLength):
+	for j in range(mazeLength):
+		print maze[i][j], maze[i][j].up, maze[i][j].right, maze[i][j].down, maze[i][j].left
+
+print "interpolate: "
+Maze.mapInterpolate(maze)
+for i in range(mazeLength):
+	for j in range(mazeLength):
+		print maze[i][j], maze[i][j].up, maze[i][j].right, maze[i][j].down, maze[i][j].left
