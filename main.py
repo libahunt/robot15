@@ -6,6 +6,7 @@ print("Starting main.py \n\n")
 
 import Maze
 
+
 #sample only stuff
 sampleMaze5bin =[
 	[ 6, 10, 10, 10, 12],
@@ -15,13 +16,13 @@ sampleMaze5bin =[
 	[ 3, 10, 10, 10,  9]
 ]
 sampleMaze5Target = [2, 2]
-
+startAddr = [4,4]
 print "Maze binary:"
 for i in range(5):
 	print sampleMaze5bin[i]
 print " "
 
-Maze.solve(Maze.binToMaze(sampleMaze5bin), sampleMaze5Target)
+Maze.solve(Maze.binToMaze(sampleMaze5bin), startAddr, sampleMaze5Target)
 
 print " "
 print " "
@@ -38,13 +39,14 @@ sampleMaze8bin = [
 	[3, 10, 10, 9, 2, 11, 10, 8]
 ]
 sampleMaze8Target = [3, 3]
+startAddr = [7,7]
 
 print "Maze binary:"
 for i in range(8):
 	print sampleMaze8bin[i]
 print " "
 
-Maze.solve(Maze.binToMaze(sampleMaze8bin), sampleMaze8Target)
+Maze.solve(Maze.binToMaze(sampleMaze8bin), startAddr, sampleMaze8Target)
 
 #-------------------------------
 #test mapping 
@@ -52,12 +54,7 @@ Maze.solve(Maze.binToMaze(sampleMaze8bin), sampleMaze8Target)
 
 mazeLength = 8
 maze = Maze.createUnknown(mazeLength)
-print "Create unknown object: "
-
-for i in range(mazeLength):
-	for j in range(mazeLength):
-		print maze[i][j], maze[i][j].up, maze[i][j].right, maze[i][j].down, maze[i][j].left
-
+print "Create unknown maze object"
 
 
 
@@ -65,25 +62,42 @@ for i in range(mazeLength):
 currentOrientation = 2 # bitshift 0 right, 1 down, 2 left, 3 up
 #and from last address in the maze
 currentAddress = [mazeLength-1, mazeLength-1]
-#behind the robot there is a wall
-maze[currentAddress[0]][currentAddress[1]].knownRight = True
-maze[currentAddress[0]][currentAddress[1]].right = False
+#we know the mapping of first square
+maze[currentAddress[0]][currentAddress[1]].up = 'wall'
+maze[currentAddress[0]][currentAddress[1]].right = 'wall'
+maze[currentAddress[0]][currentAddress[1]].down = 'wall'
+maze[currentAddress[0]][currentAddress[1]].left = 'door'
 
 #wait arduino to report "d"
 #Tell arduino to search: print "e"
 
 #pretend received dummy report, in real life report ends with "d"
-report = 2260
-print "report ", report
 
-Maze.mapReport(maze, report, currentAddress, currentOrientation)
+Maze.mapReport(maze, '2260', currentAddress, currentOrientation)
+Maze.printMaze(maze)
 
-for i in range(mazeLength):
-	for j in range(mazeLength):
-		print maze[i][j], maze[i][j].up, maze[i][j].right, maze[i][j].down, maze[i][j].left
-
-print "interpolate: "
 Maze.mapInterpolate(maze)
-for i in range(mazeLength):
-	for j in range(mazeLength):
-		print maze[i][j], maze[i][j].up, maze[i][j].right, maze[i][j].down, maze[i][j].left
+#Maze.printMaze(maze)
+
+targetAddr = [0,0]
+
+explorePath, targetOrientation = Maze.chooseExplorePoint(maze, currentAddress, targetAddr)
+
+order = Maze.makeOrders(explorePath, currentOrientation, targetOrientation, currentAddress)
+
+#after telling arduino to move, the position becomes:
+currentAddress = explorePath[-1]
+currentOrientation = targetOrientation
+
+Maze.mapReport(maze, '75', currentAddress, currentOrientation)
+Maze.printMaze(maze)
+Maze.mapInterpolate(maze)
+#Maze.printMaze(maze)
+
+explorePath, targetOrientation = Maze.chooseExplorePoint(maze, currentAddress, targetAddr)
+order = Maze.makeOrders(explorePath, currentOrientation, targetOrientation, currentAddress)
+
+#after telling arduino to move, the position becomes:
+currentAddress = explorePath[-1]
+currentOrientation = targetOrientation
+
