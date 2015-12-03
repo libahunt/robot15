@@ -166,7 +166,7 @@ def chooseExplorePoint(maze, currentAddress, targetAddr):
 		unsolved = 0
 		for path in paths:
 			if (path.status == 'foreign'):
-				foreignPaths.append(paths[i])
+				foreignPaths.append(path)
 			if (path.status == 'open'):
 				unsolved += 1
 
@@ -205,16 +205,55 @@ def chooseExplorePoint(maze, currentAddress, targetAddr):
 		#if orientation is "good", return
 		if (goodOrientation):
 			#remove last address from map
+			print "The foreign square:", pathMap[-1]
 			pathMap.pop()
 			return pathMap, targetOrientation
 
 	#if none returned so far, return the last one
+	print "The foreign square:", pathMap[-1]
 	pathMap.pop()
 	print "Exploration result: ", pathMap, readableOrientation(targetOrientation)
 	return pathMap, targetOrientation
 
 
 
+def makeOrders(path, currentOrientation, targetOrientation, currentAddress):
+	order = ''
+	moveLength = 0
+	for i in range(len(path)):
+		#check if turn is needed
+		if (i == len(path)-1):
+			#last step turn according to target orientation
+			nextOrientation = targetOrientation
+		else:
+			#turn according to currentorientation and next step direction
+			nextOrientation = squareOrientation(path[i], path[i+1])
+		
+		if (i>0):
+			#first address is current address, no move needed
+			#at the change of address 1 square move is needed
+			moveLength += 1
+			currentAddress = path[i]
+
+		print "Orientation computation from", readableOrientation(currentOrientation), "to", readableOrientation(nextOrientation)
+		turn = turnOrder(currentOrientation, nextOrientation)
+
+		if (turn !=  None):
+			#add accumulated move length to order
+			if (moveLength > 9):
+				order += '9'
+				moveLenght -= 9
+			if (moveLength > 0):
+				order += str(moveLength)
+				moveLength = 0 
+			#add turn command
+			order += turn
+			currentOrientation = nextOrientation
+	if (moveLength>0):
+		order += str(moveLength)
+
+	print "Generated order", order
+	return order
 
 
 
@@ -366,11 +405,35 @@ def checkAddrStatus(maze, nextAddr, targetAddr):
 
 	square = maze[nextAddr[0]][nextAddr[1]]
 	if (square.up == 'unknown' or square.right == 'unknown' or square.down == 'unknown' or square.left == 'unknown'):
+		print "Foreign square at", nextAddr[0], nextAddr[1]
+		print square.up, square.right, square.down, square.left
 		return 'foreign'
 	else:
 		return 'open'
 
 
+
+def turnOrder(current, target):
+	if (current == target):
+		return None
+	elif (current-target == 1 or current-target == -3):
+		return 'l'
+	elif (current-target == -1 or current-target == 3):
+		return 'r'
+	else:
+		return 'rr'
+
+
+
+def squareOrientation(thisAddr, nextAddr):
+	if (thisAddr[0] - nextAddr[0] == 1):
+		return 3 #up
+	elif (thisAddr[0] - nextAddr[0] == -1):
+		return 1 #down
+	elif (thisAddr[1] - nextAddr[1] == 1):
+		return 2 #left
+	else:
+		return 0 #right
 
 
 #---------------------------------------------------
@@ -398,63 +461,9 @@ def readableOrientation(num):
 
 
 
-def makeOrders(path, currentOrientation, targetOrientation, currentAddress):
-	order = ''
-	moveLength = 0
-	for i in range(len(path)):
-		#check if turn is needed
-		if (i == len(path)-1):
-			#last step turn according to target orientation
-			nextOrientation = targetOrientation
-		else:
-			#turn according to currentorientation and next step direction
-			nextOrientation = squareOrientation(path[i], path[i+1])
-		
-		if (i>0):
-			#first address is current address, no move needed
-			#at the change of address 1 square move is needed
-			moveLength += 1
-			currentAddress = path[i]
-
-		turn = turnOrder(currentOrientation, nextOrientation)
-
-		if (turn !=  None):
-			#add accumulated move length to order
-			if (moveLength > 9):
-				order += '9'
-				moveLenght -= 9
-			if (moveLength > 0):
-				order += str(moveLength)
-				moveLength = 0 
-			#add turn command
-			order += turn
-			currentOrientation = nextOrientation
-
-	print "Generated order", order
-	return order
 
 
 
 
 
-def turnOrder(current, target):
-	if (current == target):
-		return None
-	elif (current-target == 1 or current-target == -3):
-		return 'l'
-	elif (current-target == -1 or current-target == 3):
-		return 'r'
-	else:
-		return 'rr'
 
-
-
-def squareOrientation(thisAddr, nextAddr):
-	if (thisAddr[0] - nextAddr[0] == 1):
-		return 3 #up
-	elif (thisAddr[0] - nextAddr[0] == -1):
-		return 1 #down
-	elif (thisAddr[1] - nextAddr[1] == 1):
-		return 2 #left
-	else:
-		return 0 #right
