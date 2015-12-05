@@ -59,8 +59,9 @@ if (simRe == 's'):
 explorationStep = 0
 starttime = time.time()
 
+while (simReRead() != 'Ready'):
+	#wait for ready
 simReWrite('e')
-
 
 while True:
 	arduSays = simReRead()
