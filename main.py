@@ -7,7 +7,7 @@ print("Starting main.py \n\n")
 import Maze
 import time
 import serial
-ser = serial.Serial('/dev/ttyACM0', 9600)
+ser = serial.Serial('/dev/ttyUSB0', 9600)
 
 timelimit1 = 4*60 #time to switch from exploring to running
 timelimit2 = 5*60 #timelimit altogether
@@ -54,7 +54,7 @@ def simReWrite(command):
 
 if (simRe == 's'):
 	print "insert exploration results"
-	
+
 
 explorationStep = 0
 starttime = time.time()
