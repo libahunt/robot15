@@ -39,7 +39,7 @@ simRe = raw_input("Is this simulation over terminal (s) or real Arduino (r)?")
 def simReRead():
 	if (simRe == 'r'):
 		arduSays = ser.readline()
-		print 'Got "', command, '" from Ardu'
+		print 'Got "', arduSays, '" from Ardu'
 	else:
 		arduSays = raw_input()
 		print 'Got simulated input:', arduSays
