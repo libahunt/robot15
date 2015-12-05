@@ -43,3 +43,37 @@ Maze.solve(Maze.binToMaze(sampleMaze8bin), startAddr, sampleMaze8Target)
 #-------------------------------
 #test mapping 
 #-------------------------------
+
+
+#pretend received dummy report, in real life report ends with "d"
+
+#2260
+#75
+#3234
+#64
+#622325
+#32221
+#324
+#65
+#31
+#325
+#661
+#334
+#64
+#6221
+#35
+#32221
+#34
+#64
+#61
+#31
+#3221
+#724
+#65
+#31
+#721
+#3321
+#764
+#64
+#620
+

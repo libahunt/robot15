@@ -41,7 +41,7 @@ def createUnknown(size):
 	#create python variable with unknown properties for each square
 	#retuns the maze object
 	maze = []
-	for i in range(size):
+	for i in range(size*2-1):
 		mazeRow = []
 		for j in range(size):
 			mazeSq = MazeSquare()	
@@ -121,7 +121,7 @@ def mapReport(mazeObj, report, currentAddress, currentOrientation):
 def mapInterpolate(maze):
 	print "in mapInterpolate ..."
 	for i in range(len(maze)):
-		for j in range(len(maze)):
+		for j in range(len(maze[0])):
 			mazeSq = maze[i][j]	
 			if (mazeSq.up != 'unknown'): 
 				if (i>0):
@@ -139,7 +139,7 @@ def mapInterpolate(maze):
 						print "Error matching ", [i],[j-1], "and ", [i], [j]
 					maze[i][j-1].right = mazeSq.left
 			if (mazeSq.right != 'unknown'): 
-				if (j<len(maze)-1):
+				if (j<len(maze[0])-1):
 					if(maze[i][j+1].left != 'unknown' and maze[i][j+1].left != mazeSq.right):
 						print "Error matching ", [i],[j+1], "and ", [i], [j]
 					maze[i][j+1].left = mazeSq.right
@@ -150,8 +150,8 @@ def mapInterpolate(maze):
 
 def chooseExplorePoint(maze, currentAddress, targetAddr):
 	print "in chooseExplorePoint ..."
-	mazeLength = len(maze)
-	mazeSize = len(maze)^2
+	mazeLength = len(maze[0])
+	mazeSize = len(maze[0])^2
 	paths = []
 	paths.append(Path('open')) #start our first path from starting square
 	paths[0].map.append([currentAddress[0], currentAddress[1]])
@@ -176,7 +176,7 @@ def chooseExplorePoint(maze, currentAddress, targetAddr):
 
 		if (unsolved == 0):
 			print "All paths exhausted, no foreign area found"
-			return False
+			return None, None
 
 		solveStep += 1
 	
@@ -205,14 +205,14 @@ def chooseExplorePoint(maze, currentAddress, targetAddr):
 		#if orientation is "good", return
 		if (goodOrientation):
 			#remove last address from map
-			print "The foreign square:", pathMap[-1]
+			#print "The foreign square:", pathMap[-1]
 			pathMap.pop()
 			return pathMap, targetOrientation
 
 	#if none returned so far, return the last one
-	print "The foreign square:", pathMap[-1]
+	#print "The foreign square:", pathMap[-1]
 	pathMap.pop()
-	print "Exploration result: ", pathMap, readableOrientation(targetOrientation)
+	#print "Exploration result: ", pathMap, readableOrientation(targetOrientation)
 	return pathMap, targetOrientation
 
 
@@ -235,7 +235,7 @@ def makeOrders(path, currentOrientation, targetOrientation, currentAddress):
 			moveLength += 1
 			currentAddress = path[i]
 
-		print "Orientation computation from", readableOrientation(currentOrientation), "to", readableOrientation(nextOrientation)
+		#print "Orientation computation from", readableOrientation(currentOrientation), "to", readableOrientation(nextOrientation)
 		turn = turnOrder(currentOrientation, nextOrientation)
 
 		if (turn !=  None):
@@ -248,11 +248,13 @@ def makeOrders(path, currentOrientation, targetOrientation, currentAddress):
 				moveLength = 0 
 			#add turn command
 			order += turn
+			#print "orientation from", currentOrientation,"to",nextOrientation
 			currentOrientation = nextOrientation
+
 	if (moveLength>0):
 		order += str(moveLength)
 
-	print "Generated order", order
+	#print "Generated order", order
 	return order
 
 
@@ -263,8 +265,8 @@ def makeOrders(path, currentOrientation, targetOrientation, currentAddress):
 #------------------------------------------------------
 def solve(maze, initialAddr, targetAddr): 
 
-	mazeLength = len(maze)
-	mazeSize = len(maze)^2
+	mazeLength = len(maze[0])
+	mazeSize = len(maze[0])^2
 
 	paths = []
 
@@ -322,6 +324,60 @@ def solve(maze, initialAddr, targetAddr):
 			i += 1
 			print " "
 
+
+
+def determineTarget(startAddress, targetAddr, maze):
+	#find size of maze
+	print "In determineTarget() ..."
+	for i in range(len(maze[0])):
+
+		if (maze[startAddress[0]][i].up == 'door'):
+			targetAddr[0] = int(len(maze[0])*0.5 - 1)
+			print "New target addr", targetAddr
+			return targetAddr
+		elif (maze[startAddress[0]][i].down == 'door'):
+			targetAddr[0] = int(len(maze[0])*1.5 - 2)
+			print "New target addr", targetAddr
+			return targetAddr
+
+
+	'''for i in range(len(maze)):
+		for j in range(len(maze[0])):
+			sq = maze[i][j]
+			imax = (len(maze)-1)/2
+			imin = imax
+			jmax = len(maze[0])-1 #this is sure
+			jmin = jmax
+			if (sq.up != 'unknown' or sq.right != 'unknown' or sq.left != 'unknown' or sq.left != 'unknown'):
+				if (i>imax):
+					i=imax
+				elif (i<imin):
+					imin=i
+				if (j<jmin):
+					jmin = j
+	if (imax-imin > jmax-jmin):
+		size = imax-imin+1
+	else:
+		size = jmax-jmin+1
+	#find middlepoint indexes
+	targetI = imax - size/2
+	targetJ = jmax - size/2
+	print "New target address", targetI, targetJ
+	return [targetI, targetJ]'''
+
+
+
+def choosePath(paths):
+	if (len(pahts) == 0):
+		print "No pahts to choose from"
+		return None
+	elif (len(paths) ==1):
+		print "Just one path, use it"
+		return paths[0]
+	else:
+		#TODO
+		print "Choosing best path"
+		return paths[0]
 
 #------------------------------------------------------
 # Universal helpers
@@ -405,8 +461,8 @@ def checkAddrStatus(maze, nextAddr, targetAddr):
 
 	square = maze[nextAddr[0]][nextAddr[1]]
 	if (square.up == 'unknown' or square.right == 'unknown' or square.down == 'unknown' or square.left == 'unknown'):
-		print "Foreign square at", nextAddr[0], nextAddr[1]
-		print square.up, square.right, square.down, square.left
+		#print "Foreign square at", nextAddr[0], nextAddr[1]
+		#print square.up, square.right, square.down, square.left
 		return 'foreign'
 	else:
 		return 'open'
@@ -442,9 +498,8 @@ def squareOrientation(thisAddr, nextAddr):
 
 def printMaze(maze):
 	print "Current maze map:"
-	mazeLength = len(maze)
-	for i in range(mazeLength):
-		for j in range(mazeLength):
+	for i in range(len(maze)):
+		for j in range(len(maze[0])):
 			print "[", i, ",",j , "]:", maze[i][j].up, maze[i][j].right, maze[i][j].down, maze[i][j].left
 
 
