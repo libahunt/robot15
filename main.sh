@@ -1,7 +1,7 @@
 #!/bin/bash
 # Update code from github and start main.py of robot15-project
 
-echo "Hello, world! In main.sh";
+echo "Hello, world! In main.sh newer version";
 
 cd ~/robot15-project/
 echo "Pulling Python code from git ...";
